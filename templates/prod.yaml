@@ -69,7 +69,7 @@ Resources:
       Runtime: nodejs14.x
       MemorySize: 256
       Timeout: 100
-      Description: Retrieve a list of volume categoriess filtered by locale via Google Books API.
+      Description: Retrieve a list of volume categories filtered by locale via Google Books API.
       Events:
         ApiEvent:
           Type: Api
