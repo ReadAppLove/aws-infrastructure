@@ -1,0 +1,102 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  readapp-backend
+
+Transform:
+- AWS::Serverless-2016-10-31
+
+Resources:
+  
+  mainApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      CacheClusterEnabled: true
+      CacheClusterSize: "0.5"
+      MethodSettings:
+        - ResourcePath: /~1api~1v1~1volume_categories~1*
+          HttpMethod: GET
+          CachingEnabled: true
+          CacheTtlInSeconds: 3600
+      Cors:
+        AllowMethods: "'POST, GET'"
+        AllowHeaders: "'X-Forwarded-For,Content-Type'"
+        AllowOrigin: "'*'"
+
+  codeS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: readapp-cloudformation-backend
+  
+  getVolumeByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/volumes/get-by-id.getByIdHandler
+      Runtime: nodejs14.x
+      MemorySize: 128
+      Timeout: 100
+      Description: Retrieve a single volume via Google Books API.
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /api/v1/volumes/{id}
+            Method: get
+            RestApiId:
+              Ref: mainApiGateway
+
+  getAllVolumesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/volumes/get-all.getAllHandler
+      Runtime: nodejs14.x
+      MemorySize: 256
+      Timeout: 100
+      Description: Retrieve a list of volumes filtered using the input query via Google Books API.
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /api/v1/volumes
+            Method: get
+            RestApiId:
+              Ref: mainApiGateway
+
+  getAllVolumeCategoriesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/categories/get-all.getAllHandler
+      Runtime: nodejs14.x
+      MemorySize: 256
+      Timeout: 100
+      Description: Retrieve a list of volume categoriess filtered by locale via Google Books API.
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /api/v1/volume_categories
+            Method: get
+            RestApiId:
+              Ref: mainApiGateway
+
+  getVolumesInCategoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/categories/get-volumes.handler
+      Runtime: nodejs14.x
+      MemorySize: 256
+      Timeout: 100
+      Description: Retrieve a list of volumes associated to a specific category via Google Books API.
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /api/v1/volume_categories/{id}/volumes
+            Method: get
+            RestApiId:
+              Ref: mainApiGateway
+
+Outputs:
+  WebEndpoint:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${mainApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/"
