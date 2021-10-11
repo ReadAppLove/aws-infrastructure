@@ -10,6 +10,7 @@ Resources:
   mainApiGateway:
     Type: AWS::Serverless::Api
     Properties:
+      Name: readapp-api-gateway
       StageName: prod
       CacheClusterEnabled: true
       CacheClusterSize: "0.5"
