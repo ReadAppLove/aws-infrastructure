@@ -1,2 +1,2 @@
 #!/bin/sh
-sam validate --template ./templates/prod.yaml
+sam validate --template ./templates/prod.json

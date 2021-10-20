@@ -1,0 +1,66 @@
+{
+   "AWSTemplateFormatVersion": "2010-09-09",
+   "Description": "readapp-backend-production",
+   "Transform": [
+      "AWS::Serverless-2016-10-31"
+   ],
+   "Resources": {
+      "MainApiGateway": {
+         "Type": "AWS::ApiGateway::RestApi",
+         "Properties": {
+            "Description": "The main API Gateway",
+            "Name": "MainApiGateway"
+         }
+      },
+      "GatewayDeployment": {
+         "Type": "AWS::ApiGateway::Deployment",
+         "DependsOn": "HealthCheckMethod",
+         "Properties": {
+            "Description": "Production deployment",
+            "RestApiId": {
+              "Ref": "MainApiGateway"
+            },
+            "StageName": "Prod"
+         }
+      },
+      "HealthCheckResource": {
+         "Type": "AWS::ApiGateway::Resource",
+         "Properties": {
+            "RestApiId": {
+              "Ref": "MainApiGateway"
+            },
+            "ParentId": {
+                "Fn::GetAtt": [
+                    "MainApiGateway",
+                    "RootResourceId"
+                ]
+            },
+            "PathPart": "health_check"
+         }
+      },
+      "HealthCheckMethod": {
+         "Type": "AWS::ApiGateway::Method",
+         "Properties": {
+            "RestApiId": {
+              "Ref": "MainApiGateway"
+            },
+            "ResourceId": {
+              "Ref": "HealthCheckResource"
+            },
+            "HttpMethod": "GET",
+            "AuthorizationType": "NONE",
+            "Integration": {
+               "Type": "MOCK"
+            }
+         }
+      }
+   },
+   "Outputs": {
+      "ReadappMainApiGatewayProduction": {
+         "Description": "API Gateway ID for Prod stage",
+         "Value": {
+           "Ref": "MainApiGateway"
+         }
+      }
+   }
+}
