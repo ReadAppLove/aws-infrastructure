@@ -67,6 +67,35 @@ Resources:
           - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:GetAllVolumesFunction/invocations
           - lambdaArn: arn:aws:lambda:${AWS::Region}:${AWS::Region}:function:GetAllVolumesFunction
 
+  GetVolumeByIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MainApiGateway
+      ParentId: !Ref GetAllVolumesResource
+      PathPart: {proxy+}
+
+  GetAllVolumesMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MainApiGateway
+      ResourceId: !Ref GetVolumeByIdResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: 
+            application/json : Empty
+          ResponseParameters: 
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Content-Type: true
+            method.response.header.Content-Length: true
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:GetVolumeByIdFunction/invocations
+          - lambdaArn: arn:aws:lambda:${AWS::Region}:${AWS::Region}:function:GetVolumeByIdFunction
+
 Outputs:
   ApiGatewayExport:
     Description: REST Api gateway MainApiGateway
