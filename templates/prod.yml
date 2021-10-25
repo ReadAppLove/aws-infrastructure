@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: readapp-backend-production
+
+Transform:
+- AWS::Serverless-2016-10-31
+
+Resources:
+
+  MainApiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Description: The main API Gateway
+      Name: MainApiGateway
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  GatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      Description: Production deployment
+      RestApiId: !Ref MainApiGateway
+      StageName: Prod
+
+  ApiResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MainApiGateway
+      ParentId: !GetAtt
+        - MainApiGateway
+        - RootResourceId
+      PathPart: api
+
+  VersionResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MainApiGateway
+      ParentId: !Ref ApiResource
+      PathPart: v1
+
+  GetAllVolumesResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MainApiGateway
+      ParentId: !Ref VersionResource
+      PathPart: volumes
+
+  GetAllVolumesMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MainApiGateway
+      ResourceId: !Ref GetAllVolumesResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: 
+            application/json : Empty
+          ResponseParameters: 
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Content-Type: true
+            method.response.header.Content-Length: true
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:594750336714:function:GetAllVolumesFunction/invocations
+          - lambdaArn: arn:aws:lambda:eu-central-1:594750336714:function:GetAllVolumesFunction
+
+Outputs:
+  ApiGatewayExport:
+    Description: REST Api gateway MainApiGateway
+    Value: !Ref MainApiGateway
+    Export:
+      Name: ReadAppMainApiGateway
