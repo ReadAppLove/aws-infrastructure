@@ -64,8 +64,8 @@ Resources:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
         Uri: !Sub
-          - arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:594750336714:function:GetAllVolumesFunction/invocations
-          - lambdaArn: arn:aws:lambda:eu-central-1:594750336714:function:GetAllVolumesFunction
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:GetAllVolumesFunction/invocations
+          - lambdaArn: arn:aws:lambda:${AWS::Region}:${AWS::Region}:function:GetAllVolumesFunction
 
 Outputs:
   ApiGatewayExport:
