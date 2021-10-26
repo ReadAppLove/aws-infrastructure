@@ -72,9 +72,9 @@ Resources:
     Properties:
       RestApiId: !Ref MainApiGateway
       ParentId: !Ref GetAllVolumesResource
-      PathPart: {proxy+}
+      PathPart: '{proxy+}'
 
-  GetAllVolumesMethod:
+  GetVolumeByIdMethod:
     Type: AWS::ApiGateway::Method
     Properties:
       RestApiId: !Ref MainApiGateway
